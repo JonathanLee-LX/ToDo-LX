@@ -6,7 +6,7 @@
           Just Do It
         </h1>
         <div class="input-area">
-          <el-input type="text" placeholder="记下你的重要事情！"></el-input>
+          <el-input type="text" placeholder="记下你的重要事情！" v-model="todo" @keydown.enter.native="addTodo"></el-input>
         </div>
         <div class="tool-bar">
           <el-dropdown class="pull-right">
@@ -25,18 +25,26 @@
           </el-dropdown>
         </div>
         <el-collapse>
-          <el-collapse-item title="待办事项1">
-            <div>学习数据结构和算法。</div>
+          <div v-if="todoList.length">
+          <el-collapse-item :title="item.title" v-for="item in todoList" :key="item.createAt">
+            <template slot="title">
+              <el-checkbox class="pull-left" v-model="item.done" @change="getDone(item)"></el-checkbox>
+              {{item.title}}
+            </template>
+            <div>{{item.content}}</div>
           </el-collapse-item>
-          <el-collapse-item title="待办事项2">
-            <div>学习Vue.js框架</div>
+          </div>
+        </el-collapse>
+        <el-collapse>
+          <div v-if="doneList.length">
+          <el-collapse-item :title="item.title" v-for="item in doneList" :key="item.createAt">
+            <template slot="title">
+              <el-checkbox class="pull-left" v-model="item.done" @change="undo(item)"></el-checkbox>
+              <s>{{item.title}}</s>
+            </template>
+            <div><s>{{item.content}}</s></div>
           </el-collapse-item>
-          <el-collapse-item title="待办事项3">
-            <div>学习Typescript语言</div>
-          </el-collapse-item>
-          <el-collapse-item title="待办事项4">
-            <div>学习设计模式</div>
-          </el-collapse-item>
+          </div>
         </el-collapse>
       </div>
     </el-col>
@@ -44,12 +52,45 @@
 </template>
 <script lang="js">
 export default {
-  data: () => {
+  data () {
     return {
-      header: 'header',
-      aside: 'Aside',
-      main: 'Main',
-      footer: 'Footer'
+      todoList: [],
+      doneList: [],
+      todo: ''
+    }
+  },
+  methods: {
+    addTodo () {
+      this.todoList.push({
+        title: this.todo.substring(0, 2),
+        content: this.todo,
+        createAt: Date.now(),
+        done: false
+      })
+      this.reset()
+    },
+    reset () {
+      this.todo = ''
+    },
+    getDone (item) {
+      let index = this.todoList.findIndex((item, i) => {
+        return item.done === true
+      })
+      let doneItem = this.todoList.splice(index, 1)
+      this.addDone(doneItem)
+    },
+    addDone (doneItem) {
+      Array.prototype.push.apply(this.doneList, doneItem)
+      // this.doneItem.push(doneItem)
+    },
+    undo (item) {
+      // Array.prototype.push.apply(this.doneList, undoItem)
+      // this.doneItem.push(doneItem)
+      let index = this.doneList.findIndex((item, i) => {
+        return item.done === false
+      })
+      let todo = this.doneList.splice(index, 1)
+      this.addTodo(todo)
     }
   }
 }
@@ -59,9 +100,9 @@ export default {
 <style>
 .main-container {
     background-color: #fff !important;
-    min-height: 800px;
+    min-height: 600px;
     border: 1px solid #eee;
-    box-shadow: 2px 2px 1px #ccc;
+    box-shadow: 1px 1px 1px #ccc;
     border-radius: 5px;
 }
 .main {
@@ -78,5 +119,8 @@ export default {
 }
 .pull-right {
     float: right;
+}
+.pull-left {
+    float: left;
 }
 </style>
