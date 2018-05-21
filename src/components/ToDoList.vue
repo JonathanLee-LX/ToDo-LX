@@ -1,4 +1,5 @@
 <template>
+<div id="todo-app">
   <el-row>
     <el-col :offset="8" :span="8"  class="main-container">
       <div class="main">
@@ -6,7 +7,7 @@
           Just Do It
         </h1>
         <div class="input-area">
-          <el-input type="text" placeholder="记下你的重要事情！" v-model="todo" @keydown.enter.native="addTodo"></el-input>
+            <el-input type="text" placeholder="记下你的重要事情！" v-model="todo" @keydown.enter.native="addTodo"></el-input>
         </div>
         <div class="tool-bar">
           <el-dropdown class="pull-right">
@@ -24,31 +25,39 @@
             </el-dropdown-menu>
           </el-dropdown>
         </div>
+        <div>
         <el-collapse>
+          <h3 style="text-align: left;">待办事项</h3>
           <div v-if="todoList.length">
-          <el-collapse-item :title="item.title" v-for="item in todoList" :key="item.createAt">
+          <el-collapse-item :title="item.content" v-for="item in todoList" :key="item.createAt" style="text-align: left;">
             <template slot="title">
-              <el-checkbox class="pull-left" v-model="item.done" @change="getDone(item)"></el-checkbox>
+              <el-checkbox class="pull-left" v-model="item.done" @change="getDone(item)" style="margin-right: 10px;"></el-checkbox>
               {{item.title}}
+              <span style="float: right;" class="time">{{new Date(item.createAt).toLocaleTimeString()}}</span>
             </template>
-            <div>{{item.content}}</div>
+            <el-input type="textarea" :rows="3" size="small" placeholder="详细描述" v-model="item.content"></el-input>
           </el-collapse-item>
           </div>
         </el-collapse>
-        <el-collapse>
-          <div v-if="doneList.length">
-          <el-collapse-item :title="item.title" v-for="item in doneList" :key="item.createAt">
-            <template slot="title">
-              <el-checkbox class="pull-left" v-model="item.done" @change="undo(item)"></el-checkbox>
-              <s>{{item.title}}</s>
-            </template>
-            <div><s>{{item.content}}</s></div>
-          </el-collapse-item>
-          </div>
-        </el-collapse>
+        </div>
+        <div>
+          <el-collapse>
+          <h3 style="text-align: left;">已完成</h3>
+            <div v-if="doneList.length">
+            <el-collapse-item :title="item.title" v-for="item in doneList" :key="item.createAt" style="text-align: left;">
+              <template slot="title">
+                <el-checkbox class="pull-left" v-model="item.done" @change="undo(item)" style="margin-right: 10px;"></el-checkbox>
+                <s>{{item.title}}</s>
+              </template>
+              <div><s>{{item.content}}</s></div>
+            </el-collapse-item>
+            </div>
+          </el-collapse>
+        </div>
       </div>
     </el-col>
   </el-row>
+</div>
 </template>
 <script lang="js">
 export default {
@@ -61,9 +70,10 @@ export default {
   },
   methods: {
     addTodo () {
+      if (this.todo.trim() === '') return
       this.todoList.push({
-        title: this.todo.substring(0, 2),
-        content: this.todo,
+        title: this.todo,
+        content: '',
         createAt: Date.now(),
         done: false
       })
@@ -84,14 +94,22 @@ export default {
       // this.doneItem.push(doneItem)
     },
     undo (item) {
-      // Array.prototype.push.apply(this.doneList, undoItem)
-      // this.doneItem.push(doneItem)
       let index = this.doneList.findIndex((item, i) => {
         return item.done === false
       })
-      let todo = this.doneList.splice(index, 1)
-      this.addTodo(todo)
+      let todo = this.doneList.splice(index, 1)[0]
+      this.todoList.push({
+        title: todo.title,
+        content: todo.content,
+        createAt: todo.createAt,
+        done: todo.done
+      })
     }
+  },
+  created () {
+  },
+  beforeDestroy () {
+    alert(this.todoList)
   }
 }
 
@@ -104,6 +122,7 @@ export default {
     border: 1px solid #eee;
     box-shadow: 1px 1px 1px #ccc;
     border-radius: 5px;
+    margin-top: 30px;
 }
 .main {
     padding: 10px 10px;
@@ -122,5 +141,11 @@ export default {
 }
 .pull-left {
     float: left;
+}
+.time {
+    color: #aaa;
+    font-size: 0.7em;
+    display: inline-block;
+    margin-right: 5px;
 }
 </style>
