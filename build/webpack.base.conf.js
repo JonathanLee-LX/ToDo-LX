@@ -20,6 +20,7 @@ const createLintingRule = () => ({
 })
 
 module.exports = {
+  // context 是webpack的基础上下文
   context: path.resolve(__dirname, '../'),
   entry: {
     app: './src/main.js'
